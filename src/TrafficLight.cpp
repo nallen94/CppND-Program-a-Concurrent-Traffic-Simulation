@@ -75,7 +75,11 @@ void TrafficLight::cycleThroughPhases()
     // Also, the while-loop should use std::this_thread::sleep_for to wait 1ms between two cycles.
 
    auto t_start = std::chrono::system_clock::now();
-   auto cycle_duration = 5; //5 seconds cycling
+   std::random_device rd;     // Only used once to initialise (seed) engine
+   std::mt19937 rng(rd());    // Random-number engine used (Mersenne-Twister in this case)
+   std::uniform_int_distribution<int> uni(4,6); // Guaranteed unbiased
+
+   auto cycle_duration = uni(rng);
 
    while(true)
    {
@@ -88,11 +92,11 @@ void TrafficLight::cycleThroughPhases()
         else if(_currentPhase==TrafficLightPhase::green)
         _currentPhase=TrafficLightPhase::red;
 
-        
         t_start = std::chrono::system_clock::now();
+        _msgqueue.send(std::move(_currentPhase));
+        cycle_duration = uni(rng);
 
     }
-    _msgqueue.send(std::move(_currentPhase));
    }
 
    } 
